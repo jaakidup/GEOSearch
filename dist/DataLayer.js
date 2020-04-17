@@ -17,12 +17,8 @@ function GetSearchableData() {
     var searchable = [];
     var geoData = FetchGEOData();
     var deviceData = FetchDeviceData();
-    var ipMatches = function (ipaddress) {
-        var ipMatch = /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/;
-        return ipMatch.test(ipaddress);
-    };
     geoData.forEach(function (geo) {
-        var foundDevice = deviceData.find(function (device) { return ipMatches(device.meta); });
+        var foundDevice = deviceData.find(function (device) { return device.meta.includes(geo.ipv4); });
         var searchableItem = { geo: geo.geo, payload: foundDevice };
         searchable.push(searchableItem);
     });

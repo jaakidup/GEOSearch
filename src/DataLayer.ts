@@ -20,13 +20,8 @@ export function GetSearchableData() {
     let geoData = FetchGEOData();
     let deviceData = FetchDeviceData();
 
-    let ipMatches = (ipaddress: string) : boolean =>  {
-        let ipMatch = /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/;
-        return ipMatch.test(ipaddress)
-    }
-    
     geoData.forEach((geo) => {
-        let foundDevice = deviceData.find((device) => ipMatches(device.meta));
+        let foundDevice = deviceData.find((device) => device.meta.includes(geo.ipv4))         
         let searchableItem: Searchable = {geo: geo.geo, payload: foundDevice}
         searchable.push(searchableItem)
     });
