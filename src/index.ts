@@ -1,33 +1,48 @@
-/*
-
-
- GEOSearch
- 
- Desc: 
-     Fire up a new GEOSearch
-     Load up some data 
-     Do a search for all devices, sort near to far
-
-
-    Then:
-    Do a search closest device
-
- @jaakidup
-*/
-
+// ======================================== //
+//
+// GEOSearch
+// 
+// Desc: 
+//     Fire up a new GEOSearch
+//     Load up some data 
+//     Do a search for all devices, sort near to far
+//
+//
+//    Then:
+//    Do a search closest device
+//
+//    Then:
+//    Run through a formatter ()
+//
+// @jaakidup
+// ======================================== //
 
 import { GetSearchableData } from "./DataLayer";
 import { GEOSearch } from "./GEOSearch"
-import { Validator } from "./Validator"
-const valid = new Validator()
+
 
 
 
 let search = new GEOSearch(GetSearchableData());
+
+
 // search for all devices, sort near-far
+console.log("All results")
 console.log(search.search(53.574148, 17.867897))
+console.log("=======================================================")
+
 // search for closest device
-console.log(search.search(53.574148, 17.867897, true))
+console.log("Single Result")
+let singleResult = search.search(53.574148, 17.867897, true)
+console.log(singleResult)
+console.log("=======================================================")
+
+console.log("Through formatter")
+console.log(Formatter(singleResult))
+console.log("=======================================================")
+
+
+
 
 
 
@@ -35,30 +50,41 @@ console.log(search.search(53.574148, 17.867897, true))
 
 
 // Formatter is still a work in progress... 
-// finding the right REGEX to pull data!!!
-function Formatter(input: string) {
+// TODO: Make this pluggable into output result and handle single or multiple results
+// TODO: Add guards to check input
+function Formatter(item: any) : Object {
 
+    let input = item.payload.meta
     let hostname;
     let ip;
     let address;
 
-    let inputSplit = input.split(" ")
-    console.log(inputSplit)
+    let hostnameRegex = /([\w]+\.){1,3}[a-z|A-Z]+/g;
+    let ipRegex = /\b(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]))\b/g;
 
-    for (let i = 0; i < inputSplit.length; i++) {
-        const split = inputSplit[i];
+    hostname = hostnameRegex.exec(input)![0]
+    input = input.replace(hostname, "")
+    
+    ip = ipRegex.exec(input)![0]
+    input = input.replace(ipRegex, "")
 
-        if(valid.hostname(split)) {
-            hostname = split
-            console.log("hostname",hostname)
-            delete inputSplit[i]
-            continue
-        }
-        if(valid.ipv4(split)) {
-            ip = split
-            console.log("ip", ip)
-            delete inputSplit[i]
-            continue
-        }
+    address = input
+    
+    return {
+        "id": item.payload.id,        
+        "active": item.payload.active,
+        "asn": item.payload.asn,
+        "hostname": hostname,
+        "ip": ip,
+        "geo": item.geo,
+        "countrycode": item.payload.countrycode,
+        "statecode": item.payload.statecode,
+        "address": address,
+        "distance": Math.round(item.distance!)
     }
 }
+
+
+
+
+
